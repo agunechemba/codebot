@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeBot 31 — Variables Edition</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+  <!-- PALETTE -->
+  <aside class="panel">
+    <h2>Blocks</h2>
+    <div class="palette" id="palette">
+      <div class="palette-item p-move"   draggable="true" data-type="move"><span class="ico">➡️</span> Move Forward</div>
+      <div class="palette-item p-left"   draggable="true" data-type="left"><span class="ico">↰</span> Turn Left</div>
+      <div class="palette-item p-right"  draggable="true" data-type="right"><span class="ico">↱</span> Turn Right</div>
+      <div class="palette-item p-repeat" draggable="true" data-type="repeat"><span class="ico">🔁</span> Repeat N times</div>
+      <div class="palette-item p-if"     draggable="true" data-type="ifelse"><span class="ico">❓</span> If … then / else</div>
+      <div class="palette-item p-until"  draggable="true" data-type="until"><span class="ico">🎯</span> Repeat Until Goal</div>
+    </div>
+    <p class="tip">Each level has a <b>block budget</b>. Loops and conditions let you do more with fewer blocks.</p>
+    <button id="muteBtn" class="mute">🔊 Sound On</button>
+  </aside>
+
+  <!-- WORKSPACE -->
+  <main class="panel">
+    <div class="panel-head">
+      <h2>Program</h2>
+      <div class="controls">
+        <button id="runBtn" class="primary">▶ Run</button>
+        <button id="stopBtn" disabled>■ Stop</button>
+        <button id="resetBtn">↺ Reset</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+    </div>
+    <div class="budget-row">
+      <span id="budgetLabel">Blocks 0 / 3</span>
+      <div class="budget-track"><div id="budgetFill"></div></div>
+    </div>
+    <div id="workspace" class="workspace"></div>
+  </main>
+
+  <!-- STAGE -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2 id="levelName">Level 1</h2>
+      <div class="controls">
+        <button id="prevBtn">‹</button>
+        <button id="nextBtn">›</button>
+      </div>
+    </div>
+    <div class="stage-wrap"><div id="grid"></div></div>
+    <p class="hint" id="hint"></p>
+  </section>
+</div>
+
+<footer class="site-footer">
+  By <a href="https://agunechemba.github.io" target="_blank" rel="noopener noreferrer">Agunechemba Ekene</a>
+</footer>
+
+<div id="overlay" class="overlay hidden">
+  <div class="card">
+    <div class="big" id="ovIcon">🎉</div>
+    <h3 id="ovTitle">Level Complete!</h3>
+    <p id="ovText"></p>
+    <button id="ovBtn" class="primary">Next Level →</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
