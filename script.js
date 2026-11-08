@@ -45,9 +45,10 @@ const Sound = (() => {
 })();
 
 /* =========================================================
-   LEVEL GENERATOR FOR 97 LEVELS
+   ALL 97 LEVELS — EXPLICITLY DEFINED
    ========================================================= */
-const BASE_LEVELS = [
+const LEVELS = [
+  // ===== Original 31 base levels =====
   { name:"1 · First Steps", dir:0, budget:3, hint:"Only 3 blocks allowed — wrap Move Forward in a Repeat block.", map:["S...G"] },
   { name:"2 · Two Runs", dir:0, budget:6, hint:"6 blocks max. East then south — one Repeat block per straight run.", map:["S.....","......",".....G"] },
   { name:"3 · Serpentine", dir:0, budget:16, hint:"Use Repeat for each straight section of the zig-zag.", map:["S....","####.",".....",".####","....G"] },
@@ -78,72 +79,86 @@ const BASE_LEVELS = [
   { name:"28 · Winding", dir:0, budget:20, hint:"Loop through the corridors.", map:["S.....","####..","#....#","#.##.#","#.G#.#","#....#","######"] },
   { name:"29 · Grand Challenge", dir:0, budget:20, hint:"Bigger maze. Find the efficient path.", map:["S......","#####..","#.....#","#.###.#","#.#G#.#","#.....#","#######"] },
   { name:"30 · Variables 1", dir:0, budget:10, hint:"Pick up the key 🔑 to unlock the door 🚪.", map:["S.K..","####.","...D.","...G."] },
-  { name:"31 · Two Keys", dir:0, budget:22, hint:"Collect keys to pass through doors.", map:["S.K..","####.","...K.","D.###","...DG"] }
+  { name:"31 · Two Keys", dir:0, budget:22, hint:"Collect keys to pass through doors.", map:["S.K..","####.","...K.","D.###","...DG"] },
+
+  // ===== 32–43: Small 5×5 levels, pattern seed 0 = checkerboard =====
+  { name:"32 · Checker 1", dir:0, budget:11, hint:"Navigate the checkerboard pattern to reach the goal.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"33 · Checker 2", dir:1, budget:11, hint:"Start facing south — use loops to cross the checkerboard.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"34 · Checker 3", dir:2, budget:12, hint:"Start facing west — plan your route through the gaps.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"35 · Checker 4", dir:3, budget:12, hint:"Start facing north — find the efficient path.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"36 · Checker 5", dir:0, budget:12, hint:"Budget is tight — use Repeat and If blocks wisely.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"37 · Checker 6", dir:1, budget:12, hint:"Consider using If/Else to handle the checkerboard pattern.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"38 · Checker 7", dir:2, budget:13, hint:"Try 'Repeat Until Goal' for this pattern.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"39 · Checker 8", dir:3, budget:13, hint:"Use conditions to detect walls and navigate around them.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"40 · Checker 9", dir:0, budget:13, hint:"The checkerboard repeats — loop your logic.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"41 · Checker 10", dir:1, budget:14, hint:"Combine Repeat and If for an elegant solution.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"42 · Checker 11", dir:2, budget:14, hint:"Plan your moves to minimize block usage.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+  { name:"43 · Checker 12", dir:3, budget:14, hint:"Think recursively — the pattern is symmetric.", map:["S....",".#.#.",".....",".#.#.","....G"] },
+
+  // ===== 44–55: 5×5 levels, pattern seed 1 = vertical wall =====
+  { name:"44 · Wall Runner 1", dir:0, budget:14, hint:"A vertical wall divides the board — find the opening.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"45 · Wall Runner 2", dir:1, budget:14, hint:"Start facing south — the wall has a gap in the middle.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"46 · Wall Runner 3", dir:2, budget:15, hint:"Go around or through the gap — your choice.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"47 · Wall Runner 4", dir:3, budget:15, hint:"Use If blocks to detect the wall and turn.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"48 · Wall Runner 5", dir:0, budget:15, hint:"Repeat Until Goal could simplify this maze.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"49 · Wall Runner 6", dir:1, budget:16, hint:"Find the shortest path through the vertical barrier.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"50 · Wall Runner 7", dir:2, budget:16, hint:"The goal is near the centre — plan carefully.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"51 · Wall Runner 8", dir:3, budget:16, hint:"Use conditions to navigate the wall efficiently.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"52 · Wall Runner 9", dir:0, budget:17, hint:"Loops reduce block count — plan your repeats.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"53 · Wall Runner 10", dir:1, budget:17, hint:"Consider If/Else for wall detection.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"54 · Wall Runner 11", dir:2, budget:17, hint:"Maximize efficiency with nested loops.", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+  { name:"55 · Wall Runner 12", dir:3, budget:18, hint:"'Repeat Until Goal' is now available — try it!", map:["S....",".#.#.","..G#.",".#.#.","....G"] },
+
+  // ===== 56–67: 6×6 levels, pattern seed 2 = horizontal wall =====
+  { name:"56 · Crossroads 1", dir:0, budget:18, hint:"A horizontal wall spans the board — find the gap.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"57 · Crossroads 2", dir:1, budget:18, hint:"Start facing south — the goal is south of the wall.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"58 · Crossroads 3", dir:2, budget:19, hint:"Look for the opening in the horizontal barrier.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"59 · Crossroads 4", dir:3, budget:19, hint:"Use If to detect the wall ahead and choose your path.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"60 · Crossroads 5", dir:0, budget:19, hint:"'Repeat Until Goal' handles unpredictable mazes well.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"61 · Crossroads 6", dir:1, budget:20, hint:"Plan a route that minimizes block usage.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"62 · Crossroads 7", dir:2, budget:20, hint:"The walls form a cross — navigate around or through.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"63 · Crossroads 8", dir:3, budget:20, hint:"Conditions and loops together make a powerful combo.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"64 · Crossroads 9", dir:0, budget:21, hint:"Find the shortest path — every block counts.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"65 · Crossroads 10", dir:1, budget:21, hint:"The goal is south — the wall has multiple gaps.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"66 · Crossroads 11", dir:2, budget:21, hint:"Use nested conditions for complex navigation.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+  { name:"67 · Crossroads 12", dir:3, budget:22, hint:"Master the crossroads with efficient loop design.", map:["S.....",".#.#.#",".....G",".#.#.#","......",".....G"] },
+
+  // ===== 68–79: 6×6 levels, pattern seed 3 = diagonal walls =====
+  { name:"68 · Diagonal 1", dir:0, budget:22, hint:"Diagonal barriers create a zigzag path.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"69 · Diagonal 2", dir:1, budget:22, hint:"Start facing south — follow the diagonal openings.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"70 · Diagonal 3", dir:2, budget:23, hint:"The walls step diagonally — plan your turns.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"71 · Diagonal 4", dir:3, budget:23, hint:"Use If to detect walls and navigate the staircase.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"72 · Diagonal 5", dir:0, budget:23, hint:"'Repeat Until Goal' can handle diagonal patterns.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"73 · Diagonal 6", dir:1, budget:24, hint:"Weave between the diagonal wall segments.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"74 · Diagonal 7", dir:2, budget:24, hint:"Think about the pattern — can you loop it?", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"75 · Diagonal 8", dir:3, budget:24, hint:"Conditions let your robot adapt to each step.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"76 · Diagonal 9", dir:0, budget:25, hint:"The diagonal walls create a natural staircase.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"77 · Diagonal 10", dir:1, budget:25, hint:"Use nested loops for the staircase pattern.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"78 · Diagonal 11", dir:2, budget:25, hint:"Optimize your block usage — every block matters.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+  { name:"79 · Diagonal 12", dir:3, budget:26, hint:"Master the diagonal with elegant code.", map:["S.....",".#....","..#...","...#..","....#.",".....G"] },
+
+  // ===== 80–91: 6×6 levels, pattern seed 4 = horizontal stripes =====
+  { name:"80 · Stripe Runner 1", dir:0, budget:26, hint:"Horizontal stripes with gaps — find the openings.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"81 · Stripe Runner 2", dir:1, budget:26, hint:"Start facing south — navigate through the stripe gaps.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"82 · Stripe Runner 3", dir:2, budget:27, hint:"The gap is on the right side of each stripe.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"83 · Stripe Runner 4", dir:3, budget:27, hint:"Use Repeat blocks to cross each stripe efficiently.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"84 · Stripe Runner 5", dir:0, budget:27, hint:"If blocks help detect the gaps in the stripes.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"85 · Stripe Runner 6", dir:1, budget:28, hint:"'Repeat Until Goal' works well with predictable patterns.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"86 · Stripe Runner 7", dir:2, budget:28, hint:"Plan your route through the horizontal barriers.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"87 · Stripe Runner 8", dir:3, budget:28, hint:"Nested loops can handle multiple stripes cleanly.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"88 · Stripe Runner 9", dir:0, budget:29, hint:"Think of each stripe as a repeat unit.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"89 · Stripe Runner 10", dir:1, budget:29, hint:"Conditions make your program adaptive to obstacles.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"90 · Stripe Runner 11", dir:2, budget:29, hint:"Combine loops and conditions for maximum efficiency.", map:["S.....","#####.","......","#####.","......",".....G"] },
+  { name:"91 · Stripe Runner 12", dir:3, budget:30, hint:"The final stripe challenge — master your blocks.", map:["S.....","#####.","......","#####.","......",".....G"] },
+
+  // ===== 92–97: 7×7 levels with keys/doors =====
+  { name:"92 · Key Master 1", dir:0, budget:30, hint:"Collect the key to unlock the door and reach the goal.", map:["S.K....","#######",".......","#######",".......","#######",".....DG"] },
+  { name:"93 · Key Master 2", dir:1, budget:30, hint:"The key is in the top-right — plan your route.", map:["S.K....","#######",".......","#######",".......","#######",".....DG"] },
+  { name:"94 · Key Master 3", dir:2, budget:31, hint:"Use If to check for the key before reaching the door.", map:["S.K....","#######",".......","#######",".......","#######",".....DG"] },
+  { name:"95 · Key Master 4", dir:3, budget:31, hint:"The door blocks the final path — get the key first.", map:["S.K....","#######",".......","#######",".......","#######",".....DG"] },
+  { name:"96 · Key Master 5", dir:0, budget:31, hint:"'Repeat Until Goal' with key detection is powerful.", map:["S.K....","#######",".......","#######",".......","#######",".....DG"] },
+  { name:"97 · Final Key", dir:1, budget:32, hint:"The ultimate challenge — collect the key, unlock the door, reach the goal!", map:["S.K....","#######",".......","#######",".......","#######",".....DG"] }
 ];
-
-function generateProceduralLevel(idx) {
-  const num = idx + 1;
-  const size = Math.min(10, 5 + Math.floor((num - 32) / 12));
-  const hasKey = num >= 30;
-  const useUntil = num > 55;
-  const map = Array.from({length: size}, () => Array(size).fill('.'));
-  
-  const patternSeed = (num * 17) % 5;
-  if (patternSeed === 0) {
-    for(let r=1; r<size-1; r+=2) for(let c=1; c<size-1; c+=2) map[r][c] = '#';
-  } else if (patternSeed === 1) {
-    for(let r=1; r<size-1; r++) map[r][Math.floor(size/2)] = '#';
-    map[Math.floor(size/2)][Math.floor(size/2)] = '.';
-  } else if (patternSeed === 2) {
-    for(let c=1; c<size-1; c++) map[Math.floor(size/2)][c] = '#';
-    map[Math.floor(size/2)][1] = '.';
-  } else if (patternSeed === 3) {
-    for(let r=1; r<size-2; r++) { map[r][2] = '#'; map[size-1-r][size-3] = '#'; }
-  } else {
-    for(let r=1; r<size-1; r+=2) for(let c=0; c<size-1; c++) map[r][c] = '#';
-  }
-
-  map[0][0] = 'S';
-  map[size-1][size-1] = 'G';
-
-  if (hasKey && size >= 6) {
-    map[0][size-1] = 'K';
-    map[size-1][size-2] = 'D';
-    map[size-1][size-1] = 'G';
-  }
-
-  const strMap = map.map(row => row.join(''));
-  const budget = Math.max(5, Math.min(25, 6 + Math.floor(num / 6)));
-  const hint = useUntil 
-    ? `Level ${num}: Use 'Repeat Until Goal' or 'If' conditions to navigate adaptive terrain.`
-    : `Level ${num}: Master your block budget (${budget} max) with loops and precise turns.`;
-
-  return {
-    name: `${num} · ${getLevelTitle(num)}`,
-    dir: (num % 4),
-    budget,
-    hint,
-    map: strMap
-  };
-}
-
-function getLevelTitle(n) {
-  const titles = [
-    "Grid Runner", "Obstacle Course", "Keyfinder", "Locked Gate", "Maze Runner",
-    "Loop Master", "Logic Circuit", "Algorithm Alley", "Tight Squeeze", "Precision Path",
-    "Switchback", "Corridor Dash", "Doorway Code", "Condition Crafter", "Grand Maze"
-  ];
-  return titles[(n * 3) % titles.length] + " " + Math.ceil(n / 7);
-}
-
-const LEVELS = [];
-for (let i = 0; i < 97; i++) {
-  if (i < BASE_LEVELS.length) {
-    LEVELS.push(BASE_LEVELS[i]);
-  } else {
-    LEVELS.push(generateProceduralLevel(i));
-  }
-}
 
 const DIRS = [[1,0],[0,1],[-1,0],[0,-1]];
 const LABELS = { move:"Move Forward", left:"Turn Left", right:"Turn Right", repeat:"Repeat", ifelse:"If", until:"Repeat Until Goal" };
@@ -862,7 +877,7 @@ function showWin(){
   $("ovTitle").textContent = last ? "Mastered All 97 Levels!" : "Level Complete!";
   $("ovText").textContent = last
     ? "Incredible accomplishment! You completed all 97 levels of CodeBot Master Edition!"
-    : `You solved “${LEVELS[currentLevel].name}”. Ready for the next challenge?`;
+    : `You solved "${LEVELS[currentLevel].name}". Ready for the next challenge?`;
   $("ovBtn").textContent = last ? "Replay From Level 1 ↺" : "Next Level →";
   $("ovBtn").onclick = () => {
     $("overlay").classList.add("hidden");
