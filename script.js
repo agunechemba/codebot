@@ -38,154 +38,163 @@ const Sound = (() => {
     fail(){ tone(300,0.16,'square',0.13); tone(220,0.16,'square',0.13,0.15); tone(140,0.42,'square',0.13,0.30,80); },
     denied(){ tone(180,0.18,'square',0.14,0,120); },
     fanfare(){ [523,659,784,1047,1319,1568].forEach((f,i)=>tone(f, 0.32, 'triangle', 0.14, i*0.12)); },
+    setMuted(val){ muted = val; },
     toggle(){ muted = !muted; if (!muted) tone(660, 0.1, 'sine', 0.1); return muted; },
     get muted(){ return muted; }
   };
 })();
 
 /* =========================================================
-   LEVELS  (0=E, 1=S, 2=W, 3=N)
+   LEVEL GENERATOR FOR 97 LEVELS
    ========================================================= */
-const LEVELS = [
-  /* ---------- 1–13 Original ---------- */
-  { name:"1 · First Steps", dir:0, budget:3,
-    hint:"Only 3 blocks allowed — but you need 4 steps! Wrap Move Forward in a Repeat block.",
-    map:["S...G"] },
-
-  { name:"2 · Two Runs", dir:0, budget:6,
-    hint:"6 blocks max. East then south — one Repeat block per straight run.",
-    map:["S.....","......",".....G"] },
-
-  { name:"3 · Serpentine", dir:0, budget:16,
-    hint:"16 blocks. Without loops this zig-zag takes 20 — use Repeat for each straight section.",
-    map:["S....","####.",".....",".####","....G"] },
-
-  { name:"4 · Watch Out!", dir:0, budget:8,
-    hint:"8 blocks. East, then a long run south, then one more step east.",
-    map:["S....","....#","....#","....#","....G"] },
-
-  { name:"5 · Shortest Path", dir:0, budget:8,
-    hint:"8 blocks. Find the shortest way through the pillars — it's only two straight runs.",
-    map:["S....",".#.#.",".#.#.",".....","..G.."] },
-
-  { name:"6 · Long Way", dir:0, budget:6,
-    hint:"6 blocks for a long diagonal. Two Repeat blocks are all you need.",
-    map:["S.....","......","......","......",".....G"] },
-
-  { name:"7 · Around the Walls", dir:0, budget:17,
-    hint:"17 blocks. Loop around the inner walls with Repeat blocks.",
-    map:["S.....",".####.",".#..#.",".#..#.",".#..G.",".####."] },
-
-  { name:"8 · Down and Across", dir:0, budget:6,
-    hint:"6 blocks. Go all the way down first, then all the way across.",
-    map:["S.....",".#.#..",".#.#..",".#....",".#.##.","...G.."] },
-
-  { name:"9 · Long Corridors", dir:0, budget:9,
-    hint:"9 blocks. Three long runs with two turns — three Repeat blocks.",
-    map:["S...#..","###.#..","..#.#..","..#.#..","..#...G"] },
-
-  { name:"10 · The Long Way", dir:0, budget:8,
-    hint:"8 blocks. East, south, then a single step west.",
-    map:["S......",".#####.",".#...G.",".#.###.",".#.....",".######"] },
-
-  { name:"11 · Spiral", dir:0, budget:16,
-    hint:"16 blocks. Five straight segments — plan the spiral, then use five Repeat blocks.",
-    map:["S....","####.","..G#.",".###.","....."] },
-
-  { name:"12 · Snake Maze", dir:0, budget:22,
-    hint:"22 blocks. Seven runs in a snake pattern. Repeat blocks keep it under the limit.",
-    map:["S....","####.",".....",".####",".....","####.","..G.."] },
-
-  { name:"13 · Grand Finale", dir:0, budget:19,
-    hint:"19 blocks. Six long runs across the board. Plan your route, then loop it.",
-    map:["S......","######.",".......",".######",".......","######.","......G"] },
-
-  /* ---------- 14–29 Extended ---------- */
-  { name:"14 · Corner", dir:0, budget:5,
-    hint:"Only 5 blocks. East then south — two Repeat blocks do the trick.",
-    map:["S....",".....",".....",".....","....G"] },
-
-  { name:"15 · Long L", dir:0, budget:5,
-    hint:"5 blocks. A long run east, then a long run south.",
-    map:["S.....","......","......","......","......",".....G"] },
-
-  { name:"16 · Zigzag", dir:1, budget:8,
-    hint:"8 blocks. Start facing south — then across, down, and across again.",
-    map:["S.....",".....#","......","#.....",".....G"] },
-
-  { name:"17 · Spiral", dir:0, budget:14,
-    hint:"14 blocks. A long spiral — use Repeat blocks for each straight section.",
-    map:["S....","####.","#..G.","#.#..","#...."] },
-
-  { name:"18 · Around", dir:0, budget:11,
-    hint:"11 blocks. Around the outside walls and into the centre.",
-    map:["S....",".###.",".#G..",".###.","....."] },
-
-  { name:"19 · Wide L", dir:0, budget:5,
-    hint:"5 blocks. A long eastward run, then south.",
-    map:["S......",".......",".......",".......","......G"] },
-
-  { name:"20 · Snake", dir:0, budget:14,
-    hint:"14 blocks. Follow the snake — many turns, but Repeat blocks save the day.",
-    map:["S.....","#####.","......",".#####","......",".....G"] },
-
-  { name:"21 · Comb", dir:0, budget:5,
-    hint:"5 blocks. Down the left, then all the way east.",
-    map:["S.....",".#.#.#",".#.#.#",".#.#.#",".....G"] },
-
-  { name:"22 · Two Bends", dir:0, budget:11,
-    hint:"11 blocks. Down, across, down, and one final step.",
-    map:["S.....",".....#","......","#.....","#...G."] },
-
-  { name:"23 · Spiral 2", dir:0, budget:17,
-    hint:"17 blocks. Follow the right edge down, then cut across.",
-    map:["S.....",".####.",".#....",".#G...",".####.","......"] },
-
-  { name:"24 · Tight", dir:0, budget:5,
-    hint:"5 blocks. Simple L-shape with a tight budget.",
-    map:["S.....","......","......","......","....G."] },
-
-  { name:"25 · Maze 1", dir:0, budget:26,
-    hint:"26 blocks. Find the gap to enter the interior maze.",
-    map:["S.....",".####.",".#....",".#.#.#",".#G#.#",".#####"] },
-
-  { name:"26 · Maze 2", dir:0, budget:11,
-    hint:"11 blocks. The goal is in the centre — find the way in.",
-    map:["S....",".###.",".#G#.",".#.#.","....."] },
-
-  { name:"27 · Maze 3", dir:0, budget:17,
-    hint:"17 blocks. Similar challenge, different walls.",
-    map:["S.....",".####.","......",".#.##.",".#G.#.",".#####"] },
-
-  { name:"28 · Winding", dir:0, budget:20,
-    hint:"20 blocks. This maze requires careful planning. Loop through the corridors.",
-    map:["S.....","####..","#....#","#.##.#","#.G#.#","#....#","######"] },
-
-  { name:"29 · Grand Finale", dir:0, budget:20,
-    hint:"20 blocks. The final challenge — a bigger maze. Find the efficient path.",
-    map:["S......","#####..","#.....#","#.###.#","#.#G#.#","#.....#","#######"] },
-
-  /* ---------- 30–31 Variables ---------- */
-  { name:"30 · Variables", dir:0, budget:10,
-    hint:"Introducing Variables! Pick up the key 🔑 to unlock the door 🚪. Use 'If has key' to check your state.",
-    map:["S.K..",
-         "####.",
-         "...D.",
-         "...G."] },
-
-  { name:"31 · Two Keys", dir:0, budget:22,
-    hint:"You need two keys for two doors. Use loops and conditionals to get to the goal.",
-    map:["S.K..",
-         "####.",
-         "...K.",
-         ".D###",
-         "...DG"] }
+const BASE_LEVELS = [
+  { name:"1 · First Steps", dir:0, budget:3, hint:"Only 3 blocks allowed — wrap Move Forward in a Repeat block.", map:["S...G"] },
+  { name:"2 · Two Runs", dir:0, budget:6, hint:"6 blocks max. East then south — one Repeat block per straight run.", map:["S.....","......",".....G"] },
+  { name:"3 · Serpentine", dir:0, budget:16, hint:"Use Repeat for each straight section of the zig-zag.", map:["S....","####.",".....",".####","....G"] },
+  { name:"4 · Watch Out!", dir:0, budget:8, hint:"8 blocks. East, long run south, then step east.", map:["S....","....#","....#","....#","....G"] },
+  { name:"5 · Shortest Path", dir:0, budget:8, hint:"Find the shortest way through the pillars.", map:["S....",".#.#.",".#.#.",".....","..G.."] },
+  { name:"6 · Long Way", dir:0, budget:6, hint:"Two Repeat blocks are all you need for this diagonal.", map:["S.....","......","......","......",".....G"] },
+  { name:"7 · Around the Walls", dir:0, budget:17, hint:"Loop around the inner walls with Repeat blocks.", map:["S.....",".####.",".#..#.",".#..#.",".#..G.",".####."] },
+  { name:"8 · Down and Across", dir:0, budget:6, hint:"Go all the way down first, then across.", map:["S.....",".#.#..",".#.#..",".#....",".#.##.","...G.."] },
+  { name:"9 · Long Corridors", dir:0, budget:9, hint:"Three long runs with two turns — three Repeat blocks.", map:["S...#..","###.#..","..#.#..","..#.#..","..#...G"] },
+  { name:"10 · The Long Way", dir:0, budget:8, hint:"East, south, then a single step west.", map:["S......",".#####.",".#...G.",".#.###.",".#.....",".######"] },
+  { name:"11 · Spiral", dir:0, budget:16, hint:"Five straight segments — plan the spiral.", map:["S....","####.","..G#.",".###.","....."] },
+  { name:"12 · Snake Maze", dir:0, budget:22, hint:"Seven runs in a snake pattern.", map:["S....","####.",".....",".####",".....","####.","..G.."] },
+  { name:"13 · Grand Finale", dir:0, budget:19, hint:"Six long runs across the board.", map:["S......","######.",".......",".######",".......","######.","......G"] },
+  { name:"14 · Corner", dir:0, budget:5, hint:"Only 5 blocks. East then south.", map:["S....",".....",".....",".....","....G"] },
+  { name:"15 · Long L", dir:0, budget:5, hint:"Long run east, then long run south.", map:["S.....","......","......","......","......",".....G"] },
+  { name:"16 · Zigzag", dir:1, budget:8, hint:"Start facing south — across, down, and across again.", map:["S.....",".....#","......","#.....",".....G"] },
+  { name:"17 · Spiral 2", dir:0, budget:14, hint:"Use Repeat blocks for each straight section.", map:["S....","####.","#..G.","#.#..","#...."] },
+  { name:"18 · Around", dir:0, budget:11, hint:"Around the outside walls and into the centre.", map:["S....",".###.",".#G..",".###.","....."] },
+  { name:"19 · Wide L", dir:0, budget:5, hint:"Long eastward run, then south.", map:["S......",".......",".......",".......","......G"] },
+  { name:"20 · Snake 2", dir:0, budget:14, hint:"Follow the snake — Repeat blocks save the day.", map:["S.....","#####.","......",".#####","......",".....G"] },
+  { name:"21 · Comb", dir:0, budget:5, hint:"Down the left, then all the way east.", map:["S.....",".#.#.#",".#.#.#",".#.#.#",".....G"] },
+  { name:"22 · Two Bends", dir:0, budget:11, hint:"Down, across, down, and one final step.", map:["S.....",".....#","......","#.....","#...G."] },
+  { name:"23 · Spiral 3", dir:0, budget:17, hint:"Follow the right edge down, then cut across.", map:["S.....",".####.",".#....",".#G...",".####.","......"] },
+  { name:"24 · Tight", dir:0, budget:5, hint:"Simple L-shape with a tight budget.", map:["S.....","......","......","......","....G."] },
+  { name:"25 · Maze 1", dir:0, budget:26, hint:"Find the gap to enter the interior maze.", map:["S.....",".####.",".#....",".#.#.#",".#G#.#",".#####"] },
+  { name:"26 · Maze 2", dir:0, budget:11, hint:"The goal is in the centre — find the way in.", map:["S....",".###.",".#G#.",".#.#.","....."] },
+  { name:"27 · Maze 3", dir:0, budget:17, hint:"Carefully weave past inner barriers.", map:["S.....",".####.","......",".#.##.",".#G.#.",".#####"] },
+  { name:"28 · Winding", dir:0, budget:20, hint:"Loop through the corridors.", map:["S.....","####..","#....#","#.##.#","#.G#.#","#....#","######"] },
+  { name:"29 · Grand Challenge", dir:0, budget:20, hint:"Bigger maze. Find the efficient path.", map:["S......","#####..","#.....#","#.###.#","#.#G#.#","#.....#","#######"] },
+  { name:"30 · Variables 1", dir:0, budget:10, hint:"Pick up the key 🔑 to unlock the door 🚪.", map:["S.K..","####.","...D.","...G."] },
+  { name:"31 · Two Keys", dir:0, budget:22, hint:"Collect keys to pass through doors.", map:["S.K..","####.","...K.","D.###","...DG"] }
 ];
+
+function generateProceduralLevel(idx) {
+  const num = idx + 1;
+  const size = Math.min(10, 5 + Math.floor((num - 32) / 12));
+  const hasKey = num >= 30;
+  const useUntil = num > 55;
+  const map = Array.from({length: size}, () => Array(size).fill('.'));
+  
+  const patternSeed = (num * 17) % 5;
+  if (patternSeed === 0) {
+    for(let r=1; r<size-1; r+=2) for(let c=1; c<size-1; c+=2) map[r][c] = '#';
+  } else if (patternSeed === 1) {
+    for(let r=1; r<size-1; r++) map[r][Math.floor(size/2)] = '#';
+    map[Math.floor(size/2)][Math.floor(size/2)] = '.';
+  } else if (patternSeed === 2) {
+    for(let c=1; c<size-1; c++) map[Math.floor(size/2)][c] = '#';
+    map[Math.floor(size/2)][1] = '.';
+  } else if (patternSeed === 3) {
+    for(let r=1; r<size-2; r++) { map[r][2] = '#'; map[size-1-r][size-3] = '#'; }
+  } else {
+    for(let r=1; r<size-1; r+=2) for(let c=0; c<size-1; c++) map[r][c] = '#';
+  }
+
+  map[0][0] = 'S';
+  map[size-1][size-1] = 'G';
+
+  if (hasKey && size >= 6) {
+    map[0][size-1] = 'K';
+    map[size-1][size-2] = 'D';
+    map[size-1][size-1] = 'G';
+  }
+
+  const strMap = map.map(row => row.join(''));
+  const budget = Math.max(5, Math.min(25, 6 + Math.floor(num / 6)));
+  const hint = useUntil 
+    ? `Level ${num}: Use 'Repeat Until Goal' or 'If' conditions to navigate adaptive terrain.`
+    : `Level ${num}: Master your block budget (${budget} max) with loops and precise turns.`;
+
+  return {
+    name: `${num} · ${getLevelTitle(num)}`,
+    dir: (num % 4),
+    budget,
+    hint,
+    map: strMap
+  };
+}
+
+function getLevelTitle(n) {
+  const titles = [
+    "Grid Runner", "Obstacle Course", "Keyfinder", "Locked Gate", "Maze Runner",
+    "Loop Master", "Logic Circuit", "Algorithm Alley", "Tight Squeeze", "Precision Path",
+    "Switchback", "Corridor Dash", "Doorway Code", "Condition Crafter", "Grand Maze"
+  ];
+  return titles[(n * 3) % titles.length] + " " + Math.ceil(n / 7);
+}
+
+const LEVELS = [];
+for (let i = 0; i < 97; i++) {
+  if (i < BASE_LEVELS.length) {
+    LEVELS.push(BASE_LEVELS[i]);
+  } else {
+    LEVELS.push(generateProceduralLevel(i));
+  }
+}
 
 const DIRS = [[1,0],[0,1],[-1,0],[0,-1]];
 const LABELS = { move:"Move Forward", left:"Turn Left", right:"Turn Right", repeat:"Repeat", ifelse:"If", until:"Repeat Until Goal" };
-const SPEED = 250;
-const MAX_STEPS = 700;
+const SPEED = 230;
+const MAX_STEPS = 900;
+
+/* =========================================================
+   LOCAL STORAGE SYSTEM
+   ========================================================= */
+const Storage = {
+  KEY_LEVEL: "codebot_current_level",
+  KEY_MAX_LEVEL: "codebot_max_unlocked",
+  KEY_PROGS: "codebot_saved_programs",
+  KEY_MUTE: "codebot_muted",
+
+  getCurrentLevel() {
+    const v = parseInt(localStorage.getItem(this.KEY_LEVEL), 10);
+    return isNaN(v) ? 0 : Math.max(0, Math.min(LEVELS.length - 1, v));
+  },
+  setCurrentLevel(lvl) {
+    localStorage.setItem(this.KEY_LEVEL, lvl);
+    const max = this.getMaxUnlocked();
+    if (lvl > max) {
+      localStorage.setItem(this.KEY_MAX_LEVEL, lvl);
+    }
+  },
+  getMaxUnlocked() {
+    const v = parseInt(localStorage.getItem(this.KEY_MAX_LEVEL), 10);
+    return isNaN(v) ? 0 : Math.max(0, Math.min(LEVELS.length - 1, v));
+  },
+  saveProgram(lvl, prog) {
+    const all = this.getAllPrograms();
+    all[lvl] = prog;
+    localStorage.setItem(this.KEY_PROGS, JSON.stringify(all));
+  },
+  getProgram(lvl) {
+    const all = this.getAllPrograms();
+    return all[lvl] || null;
+  },
+  getAllPrograms() {
+    try {
+      return JSON.parse(localStorage.getItem(this.KEY_PROGS)) || {};
+    } catch(e) { return {}; }
+  },
+  isMuted() {
+    return localStorage.getItem(this.KEY_MUTE) === "true";
+  },
+  setMuted(muted) {
+    localStorage.setItem(this.KEY_MUTE, muted ? "true" : "false");
+  }
+};
 
 /* =========================================================
    STATE
@@ -212,7 +221,7 @@ const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /* =========================================================
-   PROGRAM MODEL
+   PROGRAM MODEL & HELPERS
    ========================================================= */
 function getList(listPath){
   let cur = program;
@@ -280,7 +289,7 @@ function flashBudget(){
     void label.offsetWidth;
     label.classList.add("shake");
   }
-  flash("Block limit reached! Use a Repeat block to do more with fewer blocks.");
+  flash("Block limit reached! Use loops or conditions to optimize your program.");
   Sound.denied();
   updateBudgetUI();
 }
@@ -295,6 +304,7 @@ function renderWorkspace(){
   root.classList.add("root-list");
   ws.appendChild(root);
   updateBudgetUI();
+  Storage.saveProgram(currentLevel, program);
 }
 
 function renderList(list, listPath){
@@ -339,6 +349,7 @@ function renderBlock(b, listPath, index){
       if (isNaN(v) || v < 1) v = 1;
       if (v > 30) v = 30;
       b.times = v; input.value = v;
+      Storage.saveProgram(currentLevel, program);
     });
     header.appendChild(input);
     const t = document.createElement("span");
@@ -359,7 +370,10 @@ function renderBlock(b, listPath, index){
     });
     sel.addEventListener("mousedown", e => e.stopPropagation());
     sel.addEventListener("click", e => e.stopPropagation());
-    sel.addEventListener("change", () => { b.cond = sel.value; });
+    sel.addEventListener("change", () => {
+      b.cond = sel.value;
+      Storage.saveProgram(currentLevel, program);
+    });
     header.appendChild(sel);
 
     const thenLabel = document.createElement("span");
@@ -547,7 +561,7 @@ function renderStage(){
   const level = LEVELS[currentLevel];
   rows = level.map.length;
   cols = level.map[0].length;
-  cellSize = Math.min(64, Math.floor(390 / Math.max(cols, rows)));
+  cellSize = Math.min(60, Math.floor(380 / Math.max(cols, rows)));
 
   currentMap = level.map.map(row => row.split(''));
 
@@ -562,6 +576,8 @@ function renderStage(){
       const ch = currentMap[y][x];
       const c = document.createElement("div");
       c.className = "cell";
+      c.style.width = cellSize + "px";
+      c.style.height = cellSize + "px";
       if (ch === "#") c.classList.add("wall");
       if (ch === "G"){
         c.classList.add("goal");
@@ -597,8 +613,27 @@ function renderStage(){
   $("prevBtn").disabled = currentLevel === 0;
   $("nextBtn").disabled = currentLevel === LEVELS.length - 1;
 
+  populateLevelSelect();
   resetRobot();
   updateBudgetUI();
+}
+
+function populateLevelSelect(){
+  const sel = $("levelSelect");
+  sel.innerHTML = "";
+  const maxUnlocked = Storage.getMaxUnlocked();
+
+  LEVELS.forEach((l, i) => {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = `Lvl ${i+1}: ${l.name.split('·')[1] || l.name}`;
+    if (i > maxUnlocked) {
+      opt.disabled = true;
+      opt.textContent += " 🔒";
+    }
+    if (i === currentLevel) opt.selected = true;
+    sel.appendChild(opt);
+  });
 }
 
 function updateRobot(animate = true){
@@ -804,6 +839,7 @@ function bumpRobot(){
 function setControls(){
   $("runBtn").disabled = running;
   $("stopBtn").disabled = !running;
+  $("levelSelect").disabled = running;
 }
 
 function flash(msg){
@@ -818,23 +854,20 @@ function flash(msg){
 }
 
 /* =========================================================
-   WIN OVERLAY
+   WIN OVERLAY & NAVIGATION
    ========================================================= */
 function showWin(){
   const last = currentLevel === LEVELS.length - 1;
   $("ovIcon").textContent = last ? "🏆" : "🎉";
-  $("ovTitle").textContent = last ? "You Beat Every Level!" : "Level Complete!";
+  $("ovTitle").textContent = last ? "Mastered All 97 Levels!" : "Level Complete!";
   $("ovText").textContent = last
-    ? "You solved all 31 mazes while staying under budget — that's real programming!"
-    : `You solved “${LEVELS[currentLevel].name}”. Ready for the next one?`;
-  $("ovBtn").textContent = last ? "Play Again ↺" : "Next Level →";
+    ? "Incredible accomplishment! You completed all 97 levels of CodeBot Master Edition!"
+    : `You solved “${LEVELS[currentLevel].name}”. Ready for the next challenge?`;
+  $("ovBtn").textContent = last ? "Replay From Level 1 ↺" : "Next Level →";
   $("ovBtn").onclick = () => {
     $("overlay").classList.add("hidden");
     if (last){
-      currentLevel = 0;
-      program = [];
-      renderWorkspace();
-      renderStage();
+      gotoLevel(0);
     } else {
       gotoLevel(currentLevel + 1);
     }
@@ -844,15 +877,24 @@ function showWin(){
 
 function gotoLevel(i){
   currentLevel = Math.max(0, Math.min(LEVELS.length - 1, i));
-  program = [];
+  Storage.setCurrentLevel(currentLevel);
+  program = Storage.getProgram(currentLevel) || [];
   renderWorkspace();
   renderStage();
 }
 
 /* =========================================================
-   INIT / EVENTS
+   INITIALIZATION
    ========================================================= */
 function init(){
+  currentLevel = Storage.getCurrentLevel();
+  program = Storage.getProgram(currentLevel) || [];
+
+  if (Storage.isMuted()) {
+    Sound.setMuted(true);
+    $("muteBtn").textContent = "🔇 Sound Off";
+  }
+
   document.querySelectorAll(".palette-item").forEach(el => {
     el.addEventListener("dragstart", e => {
       if (running){ e.preventDefault(); return; }
@@ -896,11 +938,22 @@ function init(){
     renderWorkspace();
     resetRobot();
   });
-  $("prevBtn").addEventListener("click", () => { if (!running) gotoLevel(currentLevel - 1); });
-  $("nextBtn").addEventListener("click", () => { if (!running) gotoLevel(currentLevel + 1); });
+
+  $("prevBtn").addEventListener("click", () => { if (!running && currentLevel > 0) gotoLevel(currentLevel - 1); });
+  $("nextBtn").addEventListener("click", () => {
+    if (!running && currentLevel < LEVELS.length - 1 && currentLevel + 1 <= Storage.getMaxUnlocked()) {
+      gotoLevel(currentLevel + 1);
+    }
+  });
+
+  $("levelSelect").addEventListener("change", (e) => {
+    const val = parseInt(e.target.value, 10);
+    if (!running && !isNaN(val)) gotoLevel(val);
+  });
 
   $("muteBtn").addEventListener("click", () => {
     const muted = Sound.toggle();
+    Storage.setMuted(muted);
     $("muteBtn").textContent = muted ? "🔇 Sound Off" : "🔊 Sound On";
   });
 
@@ -915,4 +968,4 @@ function init(){
   setControls();
 }
 
-init();
+window.onload = init;

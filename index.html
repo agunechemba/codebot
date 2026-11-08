@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CodeBot 31 — Variables Edition</title>
-<link rel="stylesheet" href="styles.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeBot</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -45,7 +45,10 @@
   <!-- STAGE -->
   <section class="panel">
     <div class="panel-head">
-      <h2 id="levelName">Level 1</h2>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <h2 id="levelName">Level 1</h2>
+        <select id="levelSelect" class="level-select"></select>
+      </div>
       <div class="controls">
         <button id="prevBtn">‹</button>
         <button id="nextBtn">›</button>
@@ -57,7 +60,7 @@
 </div>
 
 <footer class="site-footer">
-  By <a href="https://agunechemba.github.io" target="_blank" rel="noopener noreferrer">Agunechemba Ekene</a>
+  CodeBot • By <a href="https://agunechemba.github.io" target="_blank" rel="noopener noreferrer">Agunechemba Ekene</a>
 </footer>
 
 <div id="overlay" class="overlay hidden">
